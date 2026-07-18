@@ -7,16 +7,25 @@
 set -xeuo pipefail
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]-$0}")
-# One entry per section group. The `.partial-prefetching.` variants are
-# intentionally omitted: they execute the same inline-snapshot call sites in
-# the shared `*.util.ts` files, so updating the default entries covers both.
+# One default entry and one `.partial-prefetching.` variant per section group.
+# Both variants must run: some inline-snapshot branches in the shared
+# `*.util.ts` files only execute with `__NEXT_PARTIAL_PREFETCHING=true` (e.g.
+# runtime-stage sync IO errors), so updating only the default entries would
+# leave those snapshots stale. Jest runs the files sequentially (--runInBand),
+# so both variants can safely write inline snapshots into the shared files.
 TESTS=(
   "$SCRIPT_DIR/metadata-and-viewport.test.ts"
+  "$SCRIPT_DIR/metadata-and-viewport.partial-prefetching.test.ts"
   "$SCRIPT_DIR/sync-dynamic.test.ts"
+  "$SCRIPT_DIR/sync-dynamic.partial-prefetching.test.ts"
   "$SCRIPT_DIR/error-attribution.test.ts"
+  "$SCRIPT_DIR/error-attribution.partial-prefetching.test.ts"
   "$SCRIPT_DIR/use-cache.test.ts"
+  "$SCRIPT_DIR/use-cache.partial-prefetching.test.ts"
   "$SCRIPT_DIR/sync-io-time-and-random.test.ts"
+  "$SCRIPT_DIR/sync-io-time-and-random.partial-prefetching.test.ts"
   "$SCRIPT_DIR/sync-io-node-crypto.test.ts"
+  "$SCRIPT_DIR/sync-io-node-crypto.partial-prefetching.test.ts"
 )
 DEV=false
 START=false
